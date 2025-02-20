@@ -1,0 +1,219 @@
+---
+title: "Hw 4"
+author: "Jaxon Lara"
+date: "jtl3236"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+#Setup
+library(stringr)
+library(dplyr)
+library(kableExtra)
+library(ggplot2)
+
+
+
+Chi_Squared_Stat = function(Expected, Observed){
+  sum((Expected-Observed)^2 / Expected)
+}
+
+
+
+Sentences = readLines("brown_sentences.txt")
+Freq_Letter = read.csv("letter_frequencies.csv")
+```
+
+[(Github_R_Code)]()
+
+# **Problem 1:**
+
+```{r, echo=FALSE, message=FALSE}
+Observed_Count_SEC = c(2021-70, 70)
+Expected_Prop_SEC = c(1-0.024, 0.024)
+Expected_Count_SEC = Expected_Prop_SEC*sum(Observed_Count_SEC)
+
+
+Chi_Sim_Distribution_SEC = replicate(100000, {
+  Sim_Count = rmultinom(1, sum(Observed_Count_SEC), Expected_Prop_SEC)
+  Chi_Squared_Stat(Expected_Count_SEC, Sim_Count)
+})
+
+
+
+Observed_Chi_Squared_Stat_SEC = Chi_Squared_Stat(Expected_Count_SEC, Observed_Count_SEC)
+
+
+
+p_value_SEC = mean(Chi_Sim_Distribution_SEC >= Observed_Chi_Squared_Stat_SEC)
+```
+
+```{r, echo=FALSE, message=FALSE}
+ChiSEC = data.frame(Chi_Sim_Distribution_SEC)
+colnames(ChiSEC)[1]="Val"
+
+ggplot(ChiSEC, aes(x=Val)) +
+geom_histogram(fill="grey15", binwidth = 1) +
+labs(title=str_wrap("Simulated probability distribution of chi-square values assuming the null hypothesis is true",width=60), x="Chi-Square stat", y="Frequency", caption="Observed Chi-Square value: 9.761  \n\nNull hypothesis: The observed data is consistent with the SEC's assertion that trades from   \nthe Iron Bank are flagged at the same 2.4% baseline rate as that of other traders.  \n\nTest statistic: Chi-Square value using the expected proportion of flagged trades being   \n2.4% to create a simulated distribution to compare the observed data to. \n\np-value: 0.002  \n\nConclusion: Using a=0.05, the p-value is statistically significant so the null   \nhypothesis is false, the observed data is not consistent with the SEC's assertion.") +
+theme(panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.y=element_line(color="grey30",linewidth=.5, linetype=1),
+      plot.caption = element_text(hjust = 0)
+      ) +
+geom_vline(xintercept=9.7608, color=2, linewidth=1) +
+scale_y_continuous(breaks=seq(0,60000,by=10000))
+```
+
+# **Problem 2:**
+
+```{r, echo=FALSE, message=FALSE}
+Expected_Prop_Health = c(0.97,0.03)
+Observed_Count_Health = c(42,8)
+Expected_Count_Health = Expected_Prop_Health * sum(Observed_Count_Health)
+
+
+
+Chi_Sim_Distribution_Health = replicate(100000, {
+  Sim_Count = rmultinom(1, sum(Observed_Count_Health), Expected_Prop_Health)
+  Chi_Squared_Stat(Expected_Count_Health, Sim_Count)
+})
+
+
+
+Observed_Chi_Squared_Stat_Health = Chi_Squared_Stat(Expected_Count_Health, Observed_Count_Health)
+
+
+
+p_value_health = mean(Chi_Sim_Distribution_Health >= Observed_Chi_Squared_Stat_Health)
+```
+
+```{r, echo=FALSE, message=FALSE}
+ChiHealth = data.frame(Chi_Sim_Distribution_Health)
+colnames(ChiHealth)[1]="Val"
+
+ggplot(ChiHealth, aes(x=Val)) +
+geom_histogram(fill="grey15", binwidth = 2) +
+labs(title=str_wrap("Simulated probability distribution of chi-square values assuming the null hypothesis is true",width=60), x="Chi-Square stat", y="Frequency", caption="Observed Chi Square value: 29.038  \n\nNull hypthesis: Gourmet Bites' rate of health code violations is in line with the average   \nrate 3% of all restaurant inspections result in health code violations.  \n\nTest statistic: Chi square value using the expected rate of health code violations   \nto create a simulated distribution to compare Gourney Bites' rate to.  \n\np-value: 0.0001  \n\nConclusion: Using a=0.05, the p-value is statistically significant so the null hypothesis   \nis false. Gourmet Bites' rate of health code violations is not in line with the average   \nrate of health code violations.") +
+theme(panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.y=element_line(color="grey30",linewidth=.5, linetype=1),
+      plot.caption = element_text(hjust = 0)
+      ) +
+geom_vline(xintercept=29.0378, color=2, linewidth=1)
+```
+
+# **Problem 3:**
+
+```{r, echo=FALSE, message=FALSE}
+Expected_Prop = c(0.30,0.25,0.20,0.15,0.10)
+Observed_Count = c(85,56,59,27,13)
+Total_Observed = sum(Observed_Count)
+Expected_Count = Expected_Prop*Total_Observed
+
+
+
+Chi_Sim_Distribution = replicate(100000, {
+  Sim_Count = rmultinom(1, Total_Observed, Expected_Prop)
+  Chi_Squared_Stat(Expected_Count, Sim_Count)
+})
+
+
+
+Observed_Chi_Squared_Stat = Chi_Squared_Stat(Expected_Count, Observed_Count)
+
+
+
+p_value = mean(Chi_Sim_Distribution >= Observed_Chi_Squared_Stat)
+#p_value = sum(Chi_Sim_Distribution >= Observed_Chi_Squared_Stat) / 50000
+```
+
+```{r, echo=FALSE, message=FALSE}
+ChiJury = data.frame(Chi_Sim_Distribution)
+colnames(ChiJury)[1]="Val"
+
+ggplot(ChiJury, aes(x=Val)) +
+geom_histogram(fill="grey15", binwidth = .5) +
+labs(title=str_wrap("Simulated probability distribution of chi-square values assuming the null hypothesis is true",width=60), x="Chi-Square stat", y="Frequency", caption="Observed chi square value: 12.426  \n\nNull hypothesis: The distribution of jurors empaneled by this judge is not significantly   \ndifferent from the country's population proportions.  \n\nTest statistic: Chi square value using the expected demographic proportions of the   \npopulation to create a simulated distribution to compare the judge's demographic proportion to.  \n\np-value: 0.015  \n\nConclusion: Using a=0.05, the p-value is statistically significant so the null hypothesis is false.   \nThe Judge's empaneled jurors demographic proportions is significantly different from the   \ncountry's population proportions which suggests some bias in jury selection.  \n\nOther explanations: It may be possible that the population proportions of where the judge is located   \nis significantly different from the country's population proportions. I would investigate further by   \ncomparing the judge's empaneled jurors demographic proportions to the population proportion   \nof the state/province/city that the judge is based out of.") +
+theme(panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.y=element_line(color="grey30",linewidth=.5, linetype=1),
+      plot.caption = element_text(hjust = 0)
+      ) +
+geom_vline(xintercept=12.4263, color=2, linewidth=1)
+```
+
+# **Problem 4:**
+
+## (A)
+
+```{r, echo=FALSE, message=FALSE}
+Chi_Squared = function(dataset){
+  
+  Chi_Squared_Values = sapply(dataset, function(sentence) {
+    
+  Cleaned_Sentence = gsub("[^A-Za-z]", "", sentence)
+  
+  Cleaned_String = toupper(Cleaned_Sentence)
+  
+  Cleaned_Counts = table(factor(strsplit(Cleaned_String, "")[[1]], levels = Freq_Letter$Letter))
+
+  Cleaned_Total = sum(Cleaned_Counts)
+  
+  Expected = as.data.frame(Freq_Letter$Probability*Cleaned_Total)
+  Observed = as.data.frame(Cleaned_Counts)$Freq
+  
+  #print(sum((Expected-Observed)^2 / Expected, na.rm=TRUE))
+  return(sum((Expected-Observed)^2 / Expected, na.rm=TRUE))
+  })
+  return(Chi_Squared_Values)
+}
+
+
+
+Chi_Squared_Multiple = as.data.frame(Chi_Squared(Sentences))
+```
+
+```{r, echo=FALSE, message=FALSE}
+colnames(Chi_Squared_Multiple)[1]="Val"
+
+ggplot(Chi_Squared_Multiple, aes(x=Val)) +
+geom_histogram(fill="grey15", binwidth = 3) +
+labs(title=str_wrap("Probability distribution of chi-square values for each sentence from a collection of English sentences extracted from the Brown Corpus (or null distribution)",width=60), x="Chi-Square stat", y="Frequency", caption="") +
+theme(panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major.y=element_line(color="grey30",linewidth=.5, linetype=1),
+      plot.caption = element_text(hjust = 0)
+      )
+```
+
+## (B)
+
+```{r, echo=FALSE, message=FALSE}
+TenCent = tibble("Sentence"=c("She opened the book and started to read the first chapter, eagerly anticipating what might come next.",
+"Despite the heavy rain, they decided to go for a long walk in the park, crossing the main avenue by the
+fountain in the center.",
+"The museum’s new exhibit features ancient artifacts from various civilizations around the world.",
+"He carefully examined the document, looking for any clues that might help solve the mystery.",
+"The students gathered in the auditorium to listen to the guest speaker’s inspiring lecture.",
+"Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening
+at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to
+Auckland.",
+"The chef demonstrated how to prepare a delicious meal using only locally sourced ingredients, focusing
+mainly on some excellent dinner recipes from Spain.",
+"They watched the sunset from the hilltop, marveling at the beautiful array of colors in the sky.",
+"The committee reviewed the proposal and provided many points of useful feedback to improve the
+project’s effectiveness.",
+"Despite the challenges faced during the project, the team worked tirelessly to ensure its successful
+completion, resulting in a product that exceeded everyone’s expectations."),"PVal"=c(1:10))
+
+for (i in 1:10){
+  TenCent$PVal[i] = round(sum(Chi_Squared_Multiple>=Chi_Squared(TenCent$Sentence[i])),3)/nrow(Chi_Squared_Multiple)
+}
+
+kbl(TenCent) %>% kable_paper(full_width = T, html_font = "Cambria") %>% kable_styling(bootstrap_options = c("striped","hover","condensed","responsive"))
+```
+## It is the 6th sentence "Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland." because its p-value of 0.009 is less than a=0.05 which is statistically significant. It is also because it has the lowest p-value compared to the other 9 sentences with the next highest being ~10x larger.
